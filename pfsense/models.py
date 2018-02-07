@@ -19,6 +19,7 @@ admin.site.register(TUPort)
 
 
 class PortGroup(models.Model):
+    """ A table of ports """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True, null=False, blank=False, help_text="Port group name")
     description = models.TextField(null=False, blank=True, help_text="Extended details")
