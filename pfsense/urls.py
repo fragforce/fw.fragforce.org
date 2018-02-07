@@ -16,9 +16,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-import pfsense
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('pf/', pfsense.urls),
+
 ]
