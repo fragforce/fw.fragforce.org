@@ -100,16 +100,25 @@ admin.site.register(PhysicalFWInterface)
 
 
 ### Network Systems ###
-class Host(models.Model):
-    """ A Fragforce server or host """
+class HostTable(models.Model):
+    """ A table to use on the firewall - contains hosts and networks """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True, null=False, blank=False, help_text="Name")
     description = models.TextField(null=False, blank=True, help_text="Extended details")
-    fqdn = models.CharField(max_length=4096, unique=True, null=False, blank=False, help_text="Host's FQDN")
-    ip = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="IPv4 or IPv6 Address")
+
+
+class Host(models.Model):
+    """ A server or host - One address """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True, null=False, blank=False,db_index=True, help_text="Name")
+    description = models.TextField(null=False, blank=True, help_text="Extended details")
+    fqdn = models.CharField(max_length=4096, unique=True, null=False, blank=False, db_index=True,help_text="Host's FQDN")
+    ip = models.GenericIPAddressField(unique=False, null=False, blank=False, db_index=True,help_text="IPv4 or IPv6 Address")
     trusted = models.NullBooleanField(help_text="Is the host trusted")
     network = models.ForeignKey(Network, null=True, help_text='Associated network', on_delete=models.SET_NULL)
-
+    mac = models.CharField(max_length=255, unique=True, null=True, blank=False, db_index=True,
+                           help_text="Interface's MAC address (The one in use - Not nessessarly the burnt in one")
+    table = models.ManyToManyField(HostTable,null=True,db_index=True)
 
 admin.site.register(Host)
 
@@ -128,6 +137,8 @@ class Network(models.Model):
     dns1 = models.GenericIPAddressField(unique=False, null=True, blank=False, help_text="Second DNS Server")
     dns2 = models.GenericIPAddressField(unique=False, null=True, blank=False, help_text="Third DNS Server")
     trusted = models.NullBooleanField(help_text="Is the host trusted")
+
+    table = models.ManyToManyField(HostTable,null=True,db_index=True)
 
 
 admin.site.register(Network)
