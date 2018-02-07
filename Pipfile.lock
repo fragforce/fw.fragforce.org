@@ -5,14 +5,14 @@
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
-            "implementation_version": "3.6.4",
+            "implementation_version": "3.6.3",
             "os_name": "posix",
             "platform_machine": "x86_64",
             "platform_python_implementation": "CPython",
-            "platform_release": "3.10.0-514.26.2.el7.x86_64",
+            "platform_release": "3.13.0-139-generic",
             "platform_system": "Linux",
-            "platform_version": "#1 SMP Tue Jul 4 15:04:05 UTC 2017",
-            "python_full_version": "3.6.4",
+            "platform_version": "#188-Ubuntu SMP Tue Jan 9 14:43:09 UTC 2018",
+            "python_full_version": "3.6.3",
             "python_version": "3.6",
             "sys_platform": "linux"
         },
