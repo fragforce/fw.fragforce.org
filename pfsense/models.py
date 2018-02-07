@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib import admin
 
+
 ### Ports ###
 class TUPort(models.Model):
     PROTO_TCP = 'tcp'
@@ -16,6 +17,7 @@ class TUPort(models.Model):
 
 admin.site.register(TUPort)
 
+
 class PortGroup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True, null=False, blank=False, help_text="Port group name")
@@ -26,6 +28,7 @@ class PortGroup(models.Model):
 
 admin.site.register(PortGroup)
 
+
 ### Firewalls ###
 
 class FirewallHardwareClass(models.Model):
@@ -35,6 +38,7 @@ class FirewallHardwareClass(models.Model):
 
 
 admin.site.register(FirewallHardwareClass)
+
 
 class FirewallHardware(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -50,11 +54,12 @@ class FirewallHardware(models.Model):
 
 admin.site.register(FirewallHardware)
 
+
 class Firewall(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     hw = models.ForeignKey(FirewallHardware, null=False, help_text="Base hardware", on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True, null=False, blank=False, help_text="Asset Name")
-    hostname = models.CharField(max_length=4096, unique=True, null=False, blank=False, help_text="Asset hostname")
+    fqdn = models.CharField(max_length=4096, unique=True, null=False, blank=False, help_text="Asset hostname")
     description = models.TextField(null=False, blank=True, help_text="Extended details")
     asset_tag = models.CharField(max_length=4096, unique=True, null=False, blank=False, help_text="Asset tag")
     org_asset_tag = models.CharField(max_length=18, unique=True, null=False, blank=False,
@@ -63,15 +68,66 @@ class Firewall(models.Model):
 
 admin.site.register(Firewall)
 
+
+#### Firewall Interfaces ####
 class LogicalFWInterface(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ifname = models.CharField(max_length=255, unique=False, null=False, blank=False, help_text="Interface name")
-    ip = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="IPv4 Address")
+    ip = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="IPv4 or IPv6 Address")
     netmask = models.GenericIPAddressField(unique=False, null=False, blank=False, default=None,
                                            help_text="Interface's netmask")
-    ip = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="IPv4 Address")
+    gateway = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="Default Gateway Address")
+    firewall = models.ForeignKey(Firewall, null=False, help_text="Firewall this interface belongs to",
+                                 on_delete=models.CASCADE)
+    mac = models.CharField(max_length=255, unique=True, null=False, blank=False, db_index=True,
+                           help_text="Interface's MAC address (The one in use - Not nessessarly the burnt in one")
+
+
+admin.site.register(LogicalFWInterface)
+
+
+class PhysicalFWInterface(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    ifname = models.CharField(max_length=255, unique=False, null=False, blank=False, help_text="Interface name")
+    hwmac = models.CharField(max_length=255, unique=False, null=False, blank=False, db_index=True,
+                             help_text="Interface's MAC address (the burnt in one - Logical interfaces hold what's "
+                                       "actually used")
     firewall = models.ForeignKey(Firewall, null=False, help_text="Firewall this interface belongs to",
                                  on_delete=models.CASCADE)
 
 
-admin.site.register(LogicalFWInterface)
+admin.site.register(PhysicalFWInterface)
+
+
+### Network Systems ###
+class Host(models.Model):
+    """ A Fragforce server or host """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True, null=False, blank=False, help_text="Name")
+    description = models.TextField(null=False, blank=True, help_text="Extended details")
+    fqdn = models.CharField(max_length=4096, unique=True, null=False, blank=False, help_text="Host's FQDN")
+    ip = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="IPv4 or IPv6 Address")
+    trusted = models.NullBooleanField(help_text="Is the host trusted")
+    network = models.ForeignKey(Network, null=True, help_text='Associated network', on_delete=models.SET_NULL)
+
+
+admin.site.register(Host)
+
+
+class Network(models.Model):
+    """ A Fragforce Network """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True, null=False, blank=False, help_text="Name")
+    description = models.TextField(null=False, blank=True, help_text="Extended details")
+    fqdn = models.CharField(max_length=4096, unique=True, null=False, blank=False, help_text="Host's FQDN")
+    ip = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="IPv4 or IPv6 Address")
+    netmask = models.GenericIPAddressField(unique=False, null=False, blank=False, default=None,
+                                           help_text="Interface's netmask")
+    gateway = models.GenericIPAddressField(unique=False, null=False, blank=False, help_text="Default Gateway Address")
+    dns0 = models.GenericIPAddressField(unique=False, null=True, blank=False, help_text="First DNS Server")
+    dns1 = models.GenericIPAddressField(unique=False, null=True, blank=False, help_text="Second DNS Server")
+    dns2 = models.GenericIPAddressField(unique=False, null=True, blank=False, help_text="Third DNS Server")
+    trusted = models.NullBooleanField(help_text="Is the host trusted")
+
+
+admin.site.register(Network)
