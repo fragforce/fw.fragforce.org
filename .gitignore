@@ -109,3 +109,4 @@ staticfiles
 .env
 /scripts/
 /Dockerfile
+/db.sqlite3
