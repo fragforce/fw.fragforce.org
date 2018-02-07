@@ -21,5 +21,5 @@ from django.shortcuts import redirect
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('pf/', include('pfsense.urls')),
-    path('', lambda: redirect('/admin', permanent=False)),
+    path('', lambda request: redirect('/admin', permanent=False)),
 ]
