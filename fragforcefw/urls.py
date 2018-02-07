@@ -15,10 +15,9 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
-import pfsense
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('pf/', pfsense.urls),
+    path('pf/', include('pfsense.urls')),
 ]
